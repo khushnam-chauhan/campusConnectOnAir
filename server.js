@@ -11,14 +11,16 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const app = express();
 
 // Middleware
+// Correct order
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "*",  // Allow all origins (use specific URL in production)
     methods: "GET,POST,PUT,DELETE",
     allowedHeaders: "Content-Type,Authorization"
   }));
   
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  
 
 // Static file serving
 app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
