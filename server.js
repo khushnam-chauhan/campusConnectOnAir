@@ -13,14 +13,14 @@ const app = express();
 // Middleware
 
 app.use(cors({
-    origin: "https://campusconnectkrmu.vercel.app", // Only allow requests from your frontend
+    origin: "https://campusconnectkrmu.vercel.app || https://campusconnect-test.onrender.com", // Only allow requests from your frontend
     methods: "GET, POST, PUT, DELETE, PATCH",  // Allow PATCH requests
     allowedHeaders: "Content-Type, Authorization"
 }));
 
 // Handle preflight requests (important for PATCH, DELETE)
 app.options("*", (req, res) => {
-    res.header("Access-Control-Allow-Origin", "https://campusconnectkrmu.vercel.app");
+    res.header("Access-Control-Allow-Origin", "https://campusconnectkrmu.vercel.app || https://campusconnect-test.onrender.com");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     return res.sendStatus(204); 
