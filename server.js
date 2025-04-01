@@ -13,18 +13,31 @@ const app = express();
 // Middleware
 
 app.use(cors({
-    origin: "https://campusconnectkrmu.vercel.app || https://campusconnect-test.onrender.com", // Only allow requests from your frontend
-    methods: "GET, POST, PUT, DELETE, PATCH",  // Allow PATCH requests
-    allowedHeaders: "Content-Type, Authorization"
+  origin: ["https://campusconnectkrmu.vercel.app", "https://campusconnect-test.onrender.com"], // Allow multiple origins
+  methods: "GET, POST, PUT, DELETE, PATCH",
+  allowedHeaders: "Content-Type, Authorization"
 }));
 
+
 // Handle preflight requests (important for PATCH, DELETE)
-app.options("*", (req, res) => {
-    res.header("Access-Control-Allow-Origin", "https://campusconnectkrmu.vercel.app || https://campusconnect-test.onrender.com");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    return res.sendStatus(204); 
+app.use((req, res, next) => {
+  const allowedOrigins = ["https://campusconnectkrmu.vercel.app", "https://campusconnect-test.onrender.com"];
+  const origin = req.headers.origin;
+  
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin);
+  }
+
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+      return res.sendStatus(204);
+  }
+
+  next();
 });
+
 
   
   app.use(express.json());
