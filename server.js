@@ -11,7 +11,6 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const app = express();
 
 // Middleware
-const cors = require("cors");
 
 app.use(cors({
     origin: "https://campusconnectkrmu.vercel.app", // Only allow requests from your frontend
