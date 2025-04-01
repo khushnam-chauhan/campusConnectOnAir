@@ -11,12 +11,22 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const app = express();
 
 // Middleware
-// Correct order
+const cors = require("cors");
+
 app.use(cors({
-    origin: "*",  // Allow all origins (use specific URL in production)
-    methods: "GET,POST,PUT,DELETE",
-    allowedHeaders: "Content-Type,Authorization"
-  }));
+    origin: "https://campusconnectkrmu.vercel.app", // Only allow requests from your frontend
+    methods: "GET, POST, PUT, DELETE, PATCH",  // Allow PATCH requests
+    allowedHeaders: "Content-Type, Authorization"
+}));
+
+// Handle preflight requests (important for PATCH, DELETE)
+app.options("*", (req, res) => {
+    res.header("Access-Control-Allow-Origin", "https://campusconnectkrmu.vercel.app");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    return res.sendStatus(204); 
+});
+
   
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
