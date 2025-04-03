@@ -13,7 +13,7 @@ const app = express();
 // Middleware
 
 app.use(cors({
-  origin: ["https://campusconnectkrmu.vercel.app", "https://campusconnect-test.onrender.com","https://campusconnectkrmu.onrender.com"], // Allow multiple origins
+  origin: ["https://campusconnectkrmu.vercel.app", "https://campusconnect-test.onrender.com","https://campusconnectkrmu.onrender.com","http://localhost:5173/"], // Allow multiple origins
   methods: "GET, POST, PUT, DELETE, PATCH",
   allowedHeaders: "Content-Type, Authorization"
 }));
