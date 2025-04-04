@@ -8,6 +8,7 @@ const {
   uploadResume,
   updateProfile
 } = require("../controllers/profileController");
+const User = require("../models/User"); // Add this to fetch user by ID
 
 const router = express.Router();
 
@@ -25,7 +26,6 @@ const fileFields = [
   { name: "resume", maxCount: 1 }
 ];
 
-// Dynamically add certification image fields (will handle up to 10 certifications)
 for (let i = 0; i < 10; i++) {
   fileFields.push({ name: `certificationImage-${i}`, maxCount: 1 });
 }
@@ -36,5 +36,26 @@ router.put("/complete", protect, upload.fields(fileFields), completeProfile);
 router.post("/update", protect, upload.fields(fileFields), updateProfile);
 router.post("/upload-photo", protect, upload.single("profilePhoto"), uploadProfilePhoto);
 router.post("/upload-resume", protect, upload.single("resume"), uploadResume);
+
+// New route for admin to fetch any user's profile by ID
+router.get("/user/:userId", protect, async (req, res) => {
+  try {
+    // Check if the requester is an admin
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized as admin" });
+    }
+
+    const user = await User.findById(req.params.userId)
+      .select("-password") // Exclude password
+      .lean(); // Convert to plain JS object
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 module.exports = router;

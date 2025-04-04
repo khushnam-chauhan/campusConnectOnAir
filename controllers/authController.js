@@ -12,7 +12,6 @@ const generateToken = (user) => {
     { expiresIn: "7d" }
   );
 };
-
 // ✅ Login User (Fixed Version)
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;

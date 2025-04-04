@@ -41,7 +41,7 @@ connectDb();
 
 // Root API
 app.get("/", (req, res) => {
-  res.send("API connected...");
+  res.send("server connected...");
 });
 
 // Start server
