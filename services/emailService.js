@@ -377,8 +377,8 @@ const sendVerificationEmail = async (user, token) => {
   try {
     const { transporter, getVerificationEmailTemplate } = require('../config/emailConfig');
     
-    // Construct verification link
-    const verificationLink = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${token}`;
+    // Use FRONTEND_URL for the verification link
+    const verificationLink = `${process.env.FRONTEND_URL || 'https://campusconnectkrmu.onrender.com'}/verify-email?token=${token}`;
     
     // Get email template
     const { subject, html } = getVerificationEmailTemplate(user.fullName, verificationLink);
@@ -393,6 +393,7 @@ const sendVerificationEmail = async (user, token) => {
     
     // Send email
     const info = await transporter.sendMail(mailOptions);
+    console.log(`Verification email sent to ${user.email}: ${info.messageId}`);
   } catch (error) {
     console.error(`Failed to send verification email to ${user.email}:`, error);
     throw new Error(`Failed to send verification email: ${error.message}`);
