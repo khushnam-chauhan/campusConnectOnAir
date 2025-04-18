@@ -19,7 +19,7 @@ app.use(
       "https://campusconnectkrmu.vercel.app",
       "https://campusconnect-test.onrender.com",
       "https://campusconnectkrmu.onrender.com",
-      "http://localhost:5173",
+      "http://localhost:5174",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
