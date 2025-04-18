@@ -38,7 +38,7 @@ router.get("/verify-email", async (req, res) => {
         json: (data) => {
           if (code === 200) {
             // Redirect to frontend with JWT in query or handle differently
-            const redirectUrl = `https://campusconnectkrmu.onrender.com/login?token=${data.token}&role=${data.user.role}`;
+            const redirectUrl = `https://campusconnectkrmu.onrender.com/login?auth-Container`;
             return res.redirect(redirectUrl);
           }
           return res.status(code).json(data);
