@@ -373,12 +373,22 @@ const getSystemEmailConfig = async () => {
  * @param {String} token - Verification token
  * @returns {Promise} - Resolves when email is sent
  */
+/**
+ * Send a verification email to a user
+ * @param {Object} user - User object containing email and fullName
+ * @param {String} token - Verification token
+ * @returns {Promise} - Resolves when email is sent
+ */
 const sendVerificationEmail = async (user, token) => {
   try {
     const { transporter, getVerificationEmailTemplate } = require('../config/emailConfig');
     
-    // Use FRONTEND_URL for the verification link
-    const verificationLink = `${process.env.FRONTEND_URL || 'https://campusconnectkrmu.onrender.com'}/verify-email?token=${token}`;
+    // Use BACKEND_URL for the verification link
+    const verificationLink = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${token}`;
+    
+    // Log the link for debugging
+    console.log("BACKEND_URL:", process.env.BACKEND_URL);
+    console.log("Verification Link:", verificationLink);
     
     // Get email template
     const { subject, html } = getVerificationEmailTemplate(user.fullName, verificationLink);
