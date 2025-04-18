@@ -29,25 +29,25 @@ router.post("/verify-email", verifyEmail);
 router.get("/verify-email", async (req, res) => {
   const { token } = req.query;
   if (!token) {
-    return res.status(400).json({ message: "Token is required" });
+    return res.status(400).send("<h1>Error: Token is required</h1>");
   }
   try {
-    // Call verifyEmail and capture the response
     await verifyEmail({ body: { token } }, {
       status: (code) => ({
         json: (data) => {
           if (code === 200) {
-            // Redirect to frontend with JWT in query or handle differently
-            const redirectUrl = `https://campusconnectkrmu.onrender.com/login?auth-Container`;
-            return res.redirect(redirectUrl);
+            return res.send(`
+              <h1>Email Verified!</h1>
+              <p>Your email has been successfully verified. Please <a href="https://campusconnectkrmu.onrender.com/login">log in</a> to continue.</p>
+            `);
           }
-          return res.status(code).json(data);
+          return res.status(code).send(`<h1>Error: ${data.message}</h1>`);
         },
       }),
     });
   } catch (error) {
     console.error("Error in GET /api/auth/verify-email:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).send("<h1>Server Error</h1><p>Please try again later.</p>");
   }
 });
 router.post("/resend-verification", resendVerification);
