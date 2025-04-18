@@ -42,52 +42,56 @@ const getUserById = async (req, res) => {
 };
 
 // Update user (admin can update any user)
- // Update user (admin can update any user)
- const updateUser = async (req, res) => {
-    try {
-      const { fullName, email, role, mobileNo, whatsappNo, rollNo } = req.body;
-      
-      const user = await User.findById(req.params.id);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      const updatedRole = role || user.role;
-      if (updatedRole === 'student' && !rollNo) {
-        return res.status(400).json({ message: "Roll number is required for student users" });
-      }
-      
-      if (fullName) user.fullName = fullName;
-      if (email) user.email = email;
-      if (role) user.role = role;
-      if (mobileNo) user.mobileNo = mobileNo;
-      if (whatsappNo) user.whatsappNo = whatsappNo;
-      if (rollNo && updatedRole === 'student') user.rollNo = rollNo;
-      
-      const updatedUser = await user.save();
-      res.json({
-        _id: updatedUser._id,
-        fullName: updatedUser.fullName,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        mobileNo: updatedUser.mobileNo,
-        whatsappNo: updatedUser.whatsappNo,
-        rollNo: updatedUser.rollNo,
-        createdAt: updatedUser.createdAt
-      });
-    } catch (error) {
-      console.error("Error updating user:", error);
-      if (error.code === 11000) {
-        if (error.keyPattern.rollNo) {
-          return res.status(400).json({ message: `Roll number '${error.keyValue.rollNo}' is already in use` });
-        }
-        if (error.keyPattern.email) {
-          return res.status(400).json({ message: `Email '${error.keyValue.email}' is already in use` });
-        }
-      }
-      res.status(500).json({ message: "Server error while updating user" });
+const updateUser = async (req, res) => {
+  try {
+    const { fullName, email, role, mobileNo, whatsappNo, rollNo, status } = req.body
+
+    const user = await User.findById(req.params.id)
+    if (!user) {
+      return res.status(404).json({ message: "User not found" })
     }
-  };
+
+    const updatedRole = role || user.role
+    if (updatedRole === "student" && !rollNo) {
+      return res.status(400).json({ message: "Roll number is required for student users" })
+    }
+
+    if (fullName) user.fullName = fullName
+    if (email) user.email = email
+    if (role) user.role = role
+    if (mobileNo) user.mobileNo = mobileNo
+    if (whatsappNo) user.whatsappNo = whatsappNo
+    if (rollNo && updatedRole === "student") user.rollNo = rollNo
+
+    // Add this line to update the status field
+    if (status) user.status = status
+
+    const updatedUser = await user.save()
+    res.json({
+      _id: updatedUser._id,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      status: updatedUser.status, // Include status in the response
+      mobileNo: updatedUser.mobileNo,
+      whatsappNo: updatedUser.whatsappNo,
+      rollNo: updatedUser.rollNo,
+      createdAt: updatedUser.createdAt,
+    })
+  } catch (error) {
+    console.error("Error updating user:", error)
+    if (error.code === 11000) {
+      if (error.keyPattern.rollNo) {
+        return res.status(400).json({ message: `Roll number '${error.keyValue.rollNo}' is already in use` })
+      }
+      if (error.keyPattern.email) {
+        return res.status(400).json({ message: `Email '${error.keyValue.email}' is already in use` })
+      }
+    }
+    res.status(500).json({ message: "Server error while updating user" })
+  }
+}
+
 
 
 // Delete user

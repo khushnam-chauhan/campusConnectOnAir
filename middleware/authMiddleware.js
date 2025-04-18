@@ -40,3 +40,16 @@ exports.admin = (req, res, next) => {
 
   next();
 };
+
+// Middleware to check staff or admin role
+exports.staffOrAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authorized, no user data" });
+  }
+
+  if (!["staff", "admin"].includes(req.user.role)) {
+    return res.status(403).json({ message: "Access denied. Staff or Admins only." });
+  }
+
+  next();
+};
