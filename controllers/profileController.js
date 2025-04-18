@@ -1,6 +1,5 @@
 const User = require("../models/User");
 
-
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -10,7 +9,6 @@ exports.getProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Ensure experience is always an array with at least one item
     let experiences = user.experience || [];
     if (!Array.isArray(experiences) || experiences.length === 0) {
       experiences = [{
@@ -58,19 +56,18 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// Process profile data helper function
+// -----------------------------
+// Helper to process form data
+// -----------------------------
 const processProfileData = (req) => {
   try {
-    // Create the update object from form data
     const updateFields = { ...req.body };
-    
-    // Parse JSON fields
+
     ['education', 'experience', 'certifications', 'skills'].forEach(field => {
       if (updateFields[field]) {
         try {
           updateFields[field] = JSON.parse(updateFields[field]);
-          
-          // Ensure experience is always an array
+
           if (field === 'experience' && !Array.isArray(updateFields[field])) {
             updateFields[field] = [updateFields[field]];
           }
@@ -79,56 +76,60 @@ const processProfileData = (req) => {
         }
       }
     });
-    
-    // Convert checkbox values to booleans
+
     if (updateFields.readyToRelocate) {
       updateFields.readyToRelocate = updateFields.readyToRelocate === "true";
     }
-    
-    // Convert boolean values in experience array
+
     if (Array.isArray(updateFields.experience)) {
       updateFields.experience = updateFields.experience.map(exp => ({
         ...exp,
         hasExperience: exp.hasExperience === true || exp.hasExperience === "true"
       }));
     }
-    
-    // Handle file uploads
+
+    // 🔧 PROFILE PHOTO HANDLING (updated)
     if (req.files) {
-      // Handle profile photo and resume
       if (req.files.profilePhoto) {
-        updateFields.profilePhoto = `/uploads/${req.files.profilePhoto[0].filename}`;
-      } else if (req.body.profilePhoto) {
-        updateFields.profilePhoto = req.body.profilePhoto.replace("http://localhost:3000", "");
-      }
-      
-      if (req.files.resume) {
-        updateFields.resume = `/uploads/${req.files.resume[0].filename}`;
-      }
-      
-      // Process certification images
-      if (updateFields.certifications && Array.isArray(updateFields.certifications)) {
-        const processedCertifications = [];
-        
-        for (let i = 0; i < updateFields.certifications.length; i++) {
-          const cert = { 
-            name: updateFields.certifications[i].name,
-            image: updateFields.certifications[i].image || "" // Preserve existing image
-          };
-          
-          // Check if there's a new certification image
-          const certFileKey = `certificationImage-${i}`;
-          if (req.files[certFileKey]) {
-            cert.image = `/uploads/${req.files[certFileKey][0].filename}`;
-          }
-          
-          processedCertifications.push(cert);
-        }
-        
-        updateFields.certifications = processedCertifications;
+        updateFields.profilePhoto = `uploads/${req.files.profilePhoto[0].filename}`;
       }
     }
-    
+
+    if (!updateFields.profilePhoto && req.body.profilePhoto) {
+      const rawPath = req.body.profilePhoto;
+
+      const cleanedPath = rawPath
+        .replace(/^\/?api\//, "")             // remove /api/ prefix
+        .replace(/^https?:\/\/[^/]+\/?/, "") // remove domain
+        .replace(/^\/+/, "");                // remove leading slashes
+
+      updateFields.profilePhoto = cleanedPath;
+    }
+
+    if (req.files?.resume) {
+      updateFields.resume = `uploads/${req.files.resume[0].filename}`;
+    }
+
+    if (updateFields.certifications && Array.isArray(updateFields.certifications)) {
+      const processedCertifications = [];
+
+      for (let i = 0; i < updateFields.certifications.length; i++) {
+        const cert = {
+          name: updateFields.certifications[i].name,
+          image: updateFields.certifications[i].image || ""
+        };
+
+        const certFileKey = `certificationImage-${i}`;
+        if (req.files[certFileKey]) {
+          cert.image = `uploads/${req.files[certFileKey][0].filename}`;
+        }
+
+        processedCertifications.push(cert);
+      }
+
+      updateFields.certifications = processedCertifications;
+    }
+
     return updateFields;
   } catch (error) {
     console.error("Error processing profile data:", error);
@@ -136,30 +137,28 @@ const processProfileData = (req) => {
   }
 };
 
-
-// Complete student profile - For first-time profile completion
+// -----------------------------
+// Complete Profile
+// -----------------------------
 exports.completeProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const updateFields = processProfileData(req);
-    
-    // Handle experience array similarly to updateProfile
-    if (updateFields.experience && Array.isArray(updateFields.experience)) {
-      if (updateFields.experience.length === 1 && !updateFields.experience[0].hasExperience) {
-        updateFields.experience = [{
-          hasExperience: false,
-          organizationName: "",
-          duration: "",
-          details: "",
-        }];
-      } else {
-        updateFields.experience = updateFields.experience.filter(exp => exp.hasExperience);
-      }
+
+    if (updateFields.experience?.length === 1 && !updateFields.experience[0].hasExperience) {
+      updateFields.experience = [{
+        hasExperience: false,
+        organizationName: "",
+        duration: "",
+        details: "",
+      }];
+    } else {
+      updateFields.experience = updateFields.experience.filter(exp => exp.hasExperience);
     }
-    
+
     const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      updateFields, 
+      userId,
+      updateFields,
       { new: true, runValidators: true }
     );
 
@@ -167,10 +166,10 @@ exports.completeProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       success: true,
-      message: "Profile completed successfully", 
-      user: updatedUser 
+      message: "Profile completed successfully",
+      user: updatedUser
     });
   } catch (error) {
     console.error("Error in completeProfile:", error);
@@ -178,31 +177,28 @@ exports.completeProfile = async (req, res) => {
   }
 };
 
-// Update student profile for profile updates
+// -----------------------------
+// Update Profile
+// -----------------------------
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const updateFields = processProfileData(req);
-    
-    // If there's only one experience and hasExperience is false, ensure it's still an array
-    if (updateFields.experience && Array.isArray(updateFields.experience)) {
-      if (updateFields.experience.length === 1 && !updateFields.experience[0].hasExperience) {
-        // Keep it as an array with one empty experience
-        updateFields.experience = [{
-          hasExperience: false,
-          organizationName: "",
-          duration: "",
-          details: "",
-        }];
-      } else {
-        // Filter out any experiences that don't have the hasExperience flag set to true
-        updateFields.experience = updateFields.experience.filter(exp => exp.hasExperience);
-      }
+
+    if (updateFields.experience?.length === 1 && !updateFields.experience[0].hasExperience) {
+      updateFields.experience = [{
+        hasExperience: false,
+        organizationName: "",
+        duration: "",
+        details: "",
+      }];
+    } else {
+      updateFields.experience = updateFields.experience.filter(exp => exp.hasExperience);
     }
-    
+
     const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      updateFields, 
+      userId,
+      updateFields,
       { new: true, runValidators: true }
     );
 
@@ -221,47 +217,44 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-
+// -----------------------------
 // Upload Profile Photo
+// -----------------------------
 exports.uploadProfilePhoto = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-
     const userId = req.user._id;
-    const filePath = `/uploads/${req.file.filename}`;
+    const profilePhoto = `uploads/${req.file.filename}`;
 
     const user = await User.findByIdAndUpdate(
-      userId, 
-      { profilePhoto: filePath }, 
+      userId,
+      { profilePhoto },
       { new: true }
     );
 
-    res.status(200).json({ message: "Profile photo uploaded successfully", user });
+    res.status(200).json({ message: "Profile photo uploaded", profilePhoto });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Error uploading profile photo:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
+// -----------------------------
 // Upload Resume
+// -----------------------------
 exports.uploadResume = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-
     const userId = req.user._id;
-    const filePath = `/uploads/${req.file.filename}`;
+    const resume = `uploads/${req.file.filename}`;
 
     const user = await User.findByIdAndUpdate(
-      userId, 
-      { resume: filePath }, 
+      userId,
+      { resume },
       { new: true }
     );
 
-    res.status(200).json({ message: "Resume uploaded successfully", user });
+    res.status(200).json({ message: "Resume uploaded", resume });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Error uploading resume:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

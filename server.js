@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Static paths
-app.use("/api/uploads", express.static(path.join(__dirname, "Uploads")));
+app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Route mounting
 app.use("/api/auth", authRoutes);
