@@ -367,6 +367,37 @@ const getSystemEmailConfig = async () => {
     throw new Error("Failed to get system email configuration");
   }
 }
+/**
+ * Send a verification email to a user
+ * @param {Object} user - User object containing email and fullName
+ * @param {String} token - Verification token
+ * @returns {Promise} - Resolves when email is sent
+ */
+const sendVerificationEmail = async (user, token) => {
+  try {
+    const { transporter, getVerificationEmailTemplate } = require('../config/emailConfig');
+    
+    // Construct verification link
+    const verificationLink = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${token}`;
+    
+    // Get email template
+    const { subject, html } = getVerificationEmailTemplate(user.fullName, verificationLink);
+    
+    // Prepare email options
+    const mailOptions = {
+      from: `"${process.env.EMAIL_DISPLAY_NAME || 'Campus Connect'}" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject,
+      html,
+    };
+    
+    // Send email
+    const info = await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error(`Failed to send verification email to ${user.email}:`, error);
+    throw new Error(`Failed to send verification email: ${error.message}`);
+  }
+};
 
 module.exports = {
   sendBulkEmail,
@@ -375,5 +406,6 @@ module.exports = {
   fetchEmailTemplates,
   trackEmailOpen,
   getEmailAnalytics,
-  getSystemEmailConfig
+  getSystemEmailConfig,
+  sendVerificationEmail
 }
