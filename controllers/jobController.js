@@ -17,23 +17,29 @@ exports.createJob = async (req, res) => {
 
 exports.getPublicJobs = async (req, res) => {
   try {
-    const { profiles, offerType, location, skills, category } = req.query;
-    const filters = { status: "approved" };
-    if (profiles) filters.profiles = profiles;
-    if (offerType) filters.offerType = offerType;
-    if (location) filters.location = location;
-    if (skills) {
-      const skillsArray = skills.split(',').map(skill => new RegExp(skill.trim(), 'i'));
-      filters.skills = { $in: skillsArray };
+    const { profiles, category } = req.query;
+    let query = { status: "approved" }; // Only show approved jobs
+
+    // Filter by profiles or category if provided
+    if (profiles || category) {
+      query.$or = [];
+      if (profiles) {
+        query.$or.push({
+          profiles: { $regex: profiles, $options: "i" }, // Case-insensitive match
+        });
+      }
+      if (category) {
+        query.$or.push({
+          category: { $in: [category] }, // Assuming category is an array in JobSchema
+        });
+      }
     }
-    if (category) {
-      const categoryArray = category.split(',').map(cat => cat.trim());
-      filters.category = { $in: categoryArray };
-    }
-    const jobs = await Job.find(filters).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, count: jobs.length, data: jobs });
+
+    const jobs = await Job.threshold(query);
+    res.status(200).json(jobs);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error fetching public jobs:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 

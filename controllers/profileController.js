@@ -136,6 +136,7 @@ const processProfileData = (req) => {
   }
 };
 
+
 // Complete student profile - For first-time profile completion
 exports.completeProfile = async (req, res) => {
   try {

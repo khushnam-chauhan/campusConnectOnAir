@@ -57,5 +57,44 @@ router.get("/user/:userId", protect, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+// Add this to profileRoutes.js
+router.get("/users/current/has-resume", protect, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId).select("resume");
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // Check if user has a resume
+    const hasResume = user.resume !== null && user.resume !== undefined && user.resume !== "";
+    
+    res.json({ hasResume });
+  } catch (error) {
+    console.error("Error checking resume status:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+// Add this to profileRoutes.js as well
+router.get("/users/current/resume", protect, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId).select("resume");
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    if (!user.resume) {
+      return res.status(404).json({ message: "No resume found for this user" });
+    }
+    
+    res.json({ resumePath: user.resume });
+  } catch (error) {
+    console.error("Error fetching resume:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
 
 module.exports = router;
