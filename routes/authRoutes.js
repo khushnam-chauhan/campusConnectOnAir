@@ -38,7 +38,7 @@ router.get("/verify-email", async (req, res) => {
           if (code === 200) {
             return res.send(`
               <h1>Email Verified!</h1>
-              <p>Your email has been successfully verified. Please <a href="https://campusconnectkrmu.onrender.com/login">log in</a> to continue.</p>
+              <p>Your email has been successfully verified. Please <a href="https://campusconnectkrmu.onrender.com/auth-Container">log in</a> to continue.</p>
             `);
           }
           return res.status(code).send(`<h1>Error: ${data.message}</h1>`);
