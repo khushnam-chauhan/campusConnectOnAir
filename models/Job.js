@@ -11,20 +11,20 @@ const JobSchema = new mongoose.Schema(
     email: { type: String, required: true },
     profiles: { type: String, required: true },
     eligibility: { type: String, required: true },
-    vacancies: { type: Number },
+    vacancies: { type: Number, required: true },
     offerType: {
-      type: [String], 
+      type: [String], // Changed to array
       enum: ["Full time Employment", "Internship + PPO", "Apprenticeship", "Summer Internship"],
-      required: true, 
+      required: true, // Ensures the array is not empty
     },
     ctcOrStipend: { type: String, required: true },
     location: { type: String, required: true },
     resultDeclaration: {
       type: String,
-      enum: ["Same day", "Within a week","Within a month", "After a month"],
+      enum: ["Same day", "Within a week","within a month", "after a month"],
       required: true,
     },
-    dateOfJoining: { type: Date },
+    dateOfJoining: { type: Date, required: true },
     reference: {
       type: String,
       enum: ["Dr. Vibha Thakur", "Ms. Shruti Bansal", "Ms. Mansi Shrivastava", "Ms. Charu Gola", "Self"],

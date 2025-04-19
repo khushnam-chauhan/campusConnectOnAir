@@ -10,7 +10,6 @@ const userRoutes = require("./routes/userRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const trainingRoutes = require("./routes/TrainingRoutes");
 const emailRoutes = require("./routes/emailRoutes"); // Add email routes
-
 const app = express();
 
 app.use(
@@ -40,7 +39,7 @@ app.use("/api/admin", userRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/trainings", trainingRoutes);
-app.use("/api/email", emailRoutes); // Add email routes
+app.use("/api/email", emailRoutes); 
 
 connectDb();
 
