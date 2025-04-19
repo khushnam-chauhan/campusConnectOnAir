@@ -42,7 +42,7 @@ exports.getProfile = async (req, res) => {
       certifications: user.certifications || [],
       skills: user.skills || [],
       experience: experiences,
-      profilePhoto: user.profilePhoto || null,
+      profilePhoto: user.profilePhoto ? user.profilePhoto.replace(/^\/+/, '') : null, // Normalize path
       resume: user.resume || null,
       role: user.role,
       createdAt: user.createdAt,
