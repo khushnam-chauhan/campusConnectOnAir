@@ -18,6 +18,7 @@ app.use(
       "https://campusconnectkrmu.vercel.app",
       "https://campusconnect-test.onrender.com",
       "https://campusconnectkrmu.onrender.com",
+      "http://campusconnect-frontend.s3-website.eu-north-1.amazonaws.com",
       "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
